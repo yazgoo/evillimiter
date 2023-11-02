@@ -6,6 +6,7 @@ import threading
 import collections
 from terminaltables import SingleTable
 
+import pickle
 import evillimiter.networking.utils as netutils
 from .menu import CommandMenu
 from evillimiter.networking.utils import BitRate
@@ -23,7 +24,7 @@ from evillimiter.networking.watch import HostWatcher
 class MainMenu(CommandMenu):
     def __init__(self, version, interface, gateway_ip, gateway_mac, netmask):
         super().__init__()
-        self.prompt = '({}Main{}) >>> '.format(IO.Style.BRIGHT, IO.Style.RESET_ALL)
+        self.prompt = '(Main) >>> '
         self.parser.add_subparser('clear', self._clear_handler)
 
         hosts_parser = self.parser.add_subparser('hosts', self._hosts_handler)
@@ -99,6 +100,7 @@ class MainMenu(CommandMenu):
         self.bandwidth_monitor.start()
         # start the host watch thread
         self.host_watcher.start()
+        self.commands = { s.identifier : { f.identifier : None for f in s.subparser._flag_commands}  for s in self.parser._subparsers }
 
     def interrupt_handler(self, ctrl_c=True):
         if ctrl_c:
